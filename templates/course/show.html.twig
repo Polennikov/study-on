@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Course{% endblock %}
+
+{% block body %}
+    <h1>{{ course.nameCourse }}</h1>
+    {{ course.description }}
+
+    {% set vars = { 'lesson': lessons } %}
+    {% include '/lesson/index.html.twig' with vars %}
+
+    </br>
+    <a href="{{ path('course_index') }}">К списку курсов</a>
+    <a href="{{ path('course_edit', {'id': course.id}) }}">Редактировать курс</a>
+    <a href="{{ path('lesson_new', {'id': course.id}) }}">Добавить урок</a>
+    {{ include('course/_delete_form.html.twig') }}
+{% endblock %}

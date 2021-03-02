@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Lesson{% endblock %}
+
+{% block body %}
+    <h1>Новый урок</h1>
+    <h3><a href="{{ path('course_show', {'id': course.id}) }}">
+            {{ course.getNameCourse }}
+        </a>
+    </h3>
+    {{ include('lesson/_form.html.twig') }}
+
+{% endblock %}
