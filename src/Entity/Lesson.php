@@ -6,7 +6,6 @@ use App\Repository\LessonRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
-
 /**
  * @ORM\Entity(repositoryClass=LessonRepository::class)
  */

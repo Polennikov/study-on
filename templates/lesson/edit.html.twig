@@ -5,7 +5,9 @@
 {% block body %}
     <h1>{{ lesson.nameLesson }}</h1>
 
-    Курс:{{ lesson.course.getNameCourse }}
+    <a href="{{ path('course_show', {'id': lesson.course.id}) }}">
+        Курс:{{ lesson.course.getNameCourse }}
+    </a>
 
     </br></br>
     {{ include('lesson/_form.html.twig', {'button_label': 'Сохранить'}) }}

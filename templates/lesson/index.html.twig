@@ -7,12 +7,10 @@
     <h3>Предметы</h3>
 
     {% for lesson in lessons %}
-
+        {{ lesson.getNumberLesson }}.
         <a href="{{ path('lesson_show', {'id': lesson.getId}) }}">{{ lesson.NameLesson }}</a>
         </br>
         </br>
     {% endfor %}
 
-
-    {# <a href="{{ path('lesson_new') }}">Create new</a> #}
 {% endblock %}

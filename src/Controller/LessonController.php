@@ -2,12 +2,10 @@
 
 namespace App\Controller;
 
-
 use App\Entity\Lesson;
 use App\Entity\Course;
 use App\Form\LessonType;
 use App\Repository\LessonRepository;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;

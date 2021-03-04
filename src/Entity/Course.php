@@ -6,9 +6,14 @@ use App\Repository\CourseRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * @ORM\Entity(repositoryClass=CourseRepository::class)
+ * @UniqueEntity(
+ *     fields={"code"},
+ *     message="Поле должно быть уникальным"
+ * )
  */
 class Course
 {
@@ -35,7 +40,7 @@ class Course
     private $code;
 
     /**
-     * @ORM\OneToMany(targetEntity=Lesson::class, mappedBy="course")
+     * @ORM\OneToMany(targetEntity=Lesson::class, mappedBy="course", cascade={"remove"})
      */
     private $lessons;
 
