@@ -4,8 +4,8 @@
 
 {% block body %}
     <h1>Новый урок</h1>
-    <h3><a href="{{ path('course_show', {'id': course.id}) }}">
-            {{ course.getNameCourse }}
+    <h3><a href="{{ path('course_show', {'id': lesson.course.id}) }}">
+            {{ lesson.course.getNameCourse }}
         </a>
     </h3>
     {{ include('lesson/_form.html.twig') }}

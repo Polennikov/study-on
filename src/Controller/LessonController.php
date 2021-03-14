@@ -28,10 +28,11 @@ class LessonController extends AbstractController
     }
 
     /**
-     * @Route("/new/{id}", name="lesson_new", methods={"GET","POST"})
+     * @Route("/new/", name="lesson_new", methods={"GET","POST"})
      */
-    public function new(int $id, Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
+        $id=$request->query->get('id');
         $course = $entityManager->getRepository(Course::class)->find($id);
         $lesson = new Lesson();
         $lesson->setCourse($course);
@@ -43,11 +44,10 @@ class LessonController extends AbstractController
             $entityManager->persist($lesson);
             $entityManager->flush();
 
-            return $this->redirect('/course/'.$course->getId());
+            return $this->redirect('/course/' . $lesson->getCourse()->getId());
         }
 
         return $this->render('lesson/new.html.twig', [
-            'course' => $course,
             'lesson' => $lesson,
             'form'   => $form->createView(),
         ]);
@@ -74,7 +74,7 @@ class LessonController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $this->getDoctrine()->getManager()->flush();
 
-            return $this->redirect('/lesson/'.$lesson->getId());
+            return $this->redirect('/lesson/' . $lesson->getId());
         }
 
         return $this->render('lesson/edit.html.twig', [
@@ -88,12 +88,12 @@ class LessonController extends AbstractController
      */
     public function delete(Request $request, Lesson $lesson): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$lesson->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $lesson->getId(), $request->request->get('_token'))) {
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->remove($lesson);
             $entityManager->flush();
         }
 
-        return $this->redirect('/course/'.$lesson->getcourse()->getId());
+        return $this->redirect('/course/' . $lesson->getcourse()->getId());
     }
 }
