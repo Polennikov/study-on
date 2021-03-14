@@ -8,7 +8,7 @@
 
     {% for course in courses %}
         <h3><a href="{{ path('course_show', {'id': course.id}) }}">
-                {{ course.nameCourse }}</a></h3>
+                {{ course.name}}</a></h3>
         {{ course.description }}
     {% endfor %}
     </br></br>

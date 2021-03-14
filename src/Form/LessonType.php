@@ -28,7 +28,7 @@ class LessonType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options):void
     {
         $builder
-            ->add('name_lesson', TextType::class, [
+            ->add('name', TextType::class, [
                 'constraints' => [
                     new Length([
                         'max' => 255,
@@ -36,8 +36,8 @@ class LessonType extends AbstractType
 
                 ],
             ])
-            ->add('content_lesson', TextareaType::class)
-            ->add('number_lesson', NumberType::class, [
+            ->add('content', TextareaType::class)
+            ->add('number', NumberType::class, [
                 'constraints' => [
                     new Regex([
                         'pattern'=>'#^[0-9]+$#',

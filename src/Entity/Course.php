@@ -27,7 +27,7 @@ class Course
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $name_course;
+    private $name;
 
     /**
      * @ORM\Column(type="string", length=1000, nullable=true)
@@ -54,14 +54,14 @@ class Course
         return $this->id;
     }
 
-    public function getNameCourse(): ?string
+    public function getName(): ?string
     {
-        return $this->name_course;
+        return $this->name;
     }
 
-    public function setNameCourse(string $name_course): self
+    public function setName(string $name): self
     {
-        $this->name_course = $name_course;
+        $this->name = $name;
 
         return $this;
     }

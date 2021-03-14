@@ -16,7 +16,7 @@ class CourseType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options):void
     {
         $builder
-            ->add('name_course', TextType::class, [
+            ->add('name', TextType::class, [
                 'constraints' => [
                     new Length([
                         'max' => 255,

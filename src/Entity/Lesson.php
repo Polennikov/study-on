@@ -21,18 +21,18 @@ class Lesson
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $name_lesson;
+    private $name;
 
     /**
      * @ORM\Column(type="text")
      */
-    private $content_lesson;
+    private $content;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
      * @Assert\LessThanOrEqual(10000)
      */
-    private $number_lesson;
+    private $number;
 
     /**
      * @ORM\ManyToOne(targetEntity=Course::class, inversedBy="lessons")
@@ -44,38 +44,38 @@ class Lesson
         return $this->id;
     }
 
-    public function getNameLesson(): ?string
+    public function getName(): ?string
     {
-        return $this->name_lesson;
+        return $this->name;
     }
 
-    public function setNameLesson(string $name_lesson): self
+    public function setName(string $name): self
     {
-        $this->name_lesson = $name_lesson;
+        $this->name= $name;
 
         return $this;
     }
 
-    public function getContentLesson(): ?string
+    public function getContent(): ?string
     {
-        return $this->content_lesson;
+        return $this->content;
     }
 
-    public function setContentLesson(string $content_lesson): self
+    public function setContent(string $content): self
     {
-        $this->content_lesson = $content_lesson;
+        $this->content = $content;
 
         return $this;
     }
 
-    public function getNumberLesson(): ?int
+    public function getNumber(): ?int
     {
-        return $this->number_lesson;
+        return $this->number;
     }
 
-    public function setNumberLesson(?int $number_lesson): self
+    public function setNumber(?int $number): self
     {
-        $this->number_lesson = $number_lesson;
+        $this->number = $number;
 
         return $this;
     }

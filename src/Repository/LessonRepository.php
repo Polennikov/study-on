@@ -24,7 +24,7 @@ class LessonRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('l')
             ->andWhere('l.course= :val')
             ->setParameter('val', $value)
-            ->orderBy('l.number_lesson', 'ASC')
+            ->orderBy('l.number', 'ASC')
             ->getQuery()
             ->getResult()
             ;

@@ -6,7 +6,7 @@
     <h1>{{ lesson.nameLesson }}</h1>
 
     <a href="{{ path('course_show', {'id': lesson.course.id}) }}">
-        Курс:{{ lesson.course.getNameCourse }}
+        Курс:{{ lesson.course.getName}}
     </a>
 
     </br> </br>
@@ -14,5 +14,5 @@
 
     {{ include('lesson/_delete_form.html.twig') }}
     </br>
-    Описание: {{ lesson.contentLesson }}
+    Описание: {{ lesson.content }}
 {% endblock %}
