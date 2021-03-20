@@ -4,13 +4,25 @@
 
 {% block body %}
     <h1>Курсы</h1>
-
-
-    {% for course in courses %}
-        <h3><a href="{{ path('course_show', {'id': course.id}) }}">
-                {{ course.name}}</a></h3>
-        {{ course.description }}
-    {% endfor %}
-    </br></br>
-    <a href="{{ path('course_new') }}">Новый курс</a>
+    <div class="container-fluid">
+        <div class="row">
+            {% for course in courses %}
+                <div class="col-6">
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-header">
+                            <h3>{{ course.name }}</h3>
+                        </div>
+                        <div class="card-body">
+                            {{ course.description }}
+                            <div class="mt-3">
+                                <a href="{{ path('course_show', {'id': course.id}) }}">Пройти</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <hr/>
+        <a href="{{ path('course_new') }}" class="btn btn-primary btn-lg">Новый курс</a>
+    </div>
 {% endblock %}
