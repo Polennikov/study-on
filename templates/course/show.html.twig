@@ -11,9 +11,9 @@
     <hr/>
     <div class="row">
         <a href="{{ path('course_index') }}" class="btn btn-secondary btn-lg mx-3">К списку курсов</a>
-        <a href="{{ path('course_edit', {'id': course.id}) }}" class="btn btn-primary btn-lg mr-3">Редактировать
+        <a href="{{ path('course_edit', {'id': course.id}) }}" class="CourseEdit btn btn-primary btn-lg mr-3">Редактировать
             курс</a>
-        <a href="{{ path('lesson_new', {'id': course.id}) }}" class="btn btn-primary btn-lg mr-3">Добавить предмет</a>
+        <a href="{{ path('lesson_new', {'id': course.id}) }}" class="LessonAdd btn btn-primary btn-lg mr-3">Добавить предмет</a>
         {{ include('course/_delete_form.html.twig') }}
     </div>
 {% endblock %}

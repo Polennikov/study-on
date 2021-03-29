@@ -30,7 +30,7 @@ class Lesson
 
     /**
      * @ORM\Column(type="integer", nullable=true)
-     * @Assert\LessThanOrEqual(10000)
+     * @Assert\LessThanOrEqual(1000)
      */
     private $number;
 

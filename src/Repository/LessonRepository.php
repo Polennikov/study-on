@@ -29,7 +29,24 @@ class LessonRepository extends ServiceEntityRepository
             ->getResult()
             ;
     }
-
+    public function findByOneLesson()
+    {
+        return $this->createQueryBuilder('c')
+            ->orderBy('c.id', 'ASC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getResult()
+            ;
+    }
+    public function findByLastLesson()
+    {
+        return $this->createQueryBuilder('c')
+            ->orderBy('c.id', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getResult()
+            ;
+    }
     // /**
     //  * @return Lesson[] Returns an array of Lesson objects
     //  */

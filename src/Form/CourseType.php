@@ -26,7 +26,7 @@ class CourseType extends AbstractType
             ->add('description', TextareaType::class, [
                 'constraints' => [
                     new Length([
-                        'max' => 10000,
+                        'max' => 1000,
                     ]),
                 ],
             ])

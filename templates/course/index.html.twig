@@ -15,7 +15,7 @@
                         <div class="card-body">
                             {{ course.description }}
                             <div class="mt-3">
-                                <a href="{{ path('course_show', {'id': course.id}) }}">Пройти</a>
+                                <a class="courseShow" href="{{ path('course_show', {'id': course.id}) }}">Пройти</a>
                             </div>
                         </div>
                     </div>
@@ -23,6 +23,6 @@
             {% endfor %}
         </div>
         <hr/>
-        <a href="{{ path('course_new') }}" class="btn btn-primary btn-lg">Новый курс</a>
+        <a href="{{ path('course_new') }}"  class="NewCourse btn btn-primary btn-lg">Новый курс</a>
     </div>
 {% endblock %}
