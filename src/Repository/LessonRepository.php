@@ -26,27 +26,27 @@ class LessonRepository extends ServiceEntityRepository
             ->setParameter('val', $value)
             ->orderBy('l.number', 'ASC')
             ->getQuery()
-            ->getResult()
-            ;
+            ->getResult();
     }
+
     public function findByOneLesson()
     {
         return $this->createQueryBuilder('c')
             ->orderBy('c.id', 'ASC')
             ->setMaxResults(1)
             ->getQuery()
-            ->getResult()
-            ;
+            ->getResult();
     }
+
     public function findByLastLesson()
     {
         return $this->createQueryBuilder('c')
             ->orderBy('c.id', 'DESC')
             ->setMaxResults(1)
             ->getQuery()
-            ->getResult()
-            ;
+            ->getResult();
     }
+
     // /**
     //  * @return Lesson[] Returns an array of Lesson objects
     //  */

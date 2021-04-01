@@ -18,15 +18,16 @@ class CourseRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Course::class);
     }
+
     public function findByOneCourse()
     {
         return $this->createQueryBuilder('c')
             ->orderBy('c.id', 'ASC')
             ->setMaxResults(1)
             ->getQuery()
-            ->getResult()
-            ;
+            ->getResult();
     }
+
     // /**
     //  * @return Course[] Returns an array of Course objects
     //  */

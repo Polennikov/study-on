@@ -32,7 +32,7 @@ class CourseController extends AbstractController
     public function new(Request $request): Response
     {
         $course = new Course();
-        $form   = $this->createForm(CourseType::class, $course);
+        $form = $this->createForm(CourseType::class, $course);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -45,7 +45,7 @@ class CourseController extends AbstractController
 
         return $this->render('course/new.html.twig', [
             'course' => $course,
-            'form'   => $form->createView(),
+            'form' => $form->createView(),
         ]);
     }
 
@@ -54,13 +54,12 @@ class CourseController extends AbstractController
      */
     public function show(Course $course): Response
     {
-        $lessons = new Lesson();
         $lessons = $this->getDoctrine()
             ->getRepository(Lesson::class)
             ->findByIdLesson($course);
 
         return $this->render('course/show.html.twig', [
-            'course'  => $course,
+            'course' => $course,
             'lessons' => $lessons,
         ]);
     }
@@ -68,7 +67,7 @@ class CourseController extends AbstractController
     /**
      * @Route("/{id}/edit", name="course_edit", methods={"GET","POST"})
      */
-    public function edit(Request $request, Course $course):Response
+    public function edit(Request $request, Course $course): Response
     {
         $form = $this->createForm(CourseType::class, $course);
         $form->handleRequest($request);
@@ -81,7 +80,7 @@ class CourseController extends AbstractController
 
         return $this->render('course/edit.html.twig', [
             'course' => $course,
-            'form'   => $form->createView(),
+            'form' => $form->createView(),
         ]);
     }
 

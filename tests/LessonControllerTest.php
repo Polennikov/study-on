@@ -4,11 +4,9 @@ namespace App\Tests;
 
 use App\DataFixtures\CourseFixtures;
 use App\Entity\Lesson;
-use App\Entity\Course;
 
 class LessonControllerTest extends AbstractTest
 {
-
     // Стартовая страница курсов
     public $pageCourse = '/course';
     public $pageLesson = '/lesson';
@@ -22,7 +20,7 @@ class LessonControllerTest extends AbstractTest
     // Проверка на корректный http-статус
     public function testLessonPageOk(): void
     {
-        $em     = static::getEntityManager();
+        $em = static::getEntityManager();
         $lesson = $em->getRepository(Lesson::class)->findByOneLesson();
         self::assertNotEmpty($lesson);
         // Проверим все GET/POST запросы
@@ -37,7 +35,7 @@ class LessonControllerTest extends AbstractTest
     // Проверка на ошибки перехода по страницам
     public function testLessonPageNotfound(): void
     {
-        $client  = self::getClient();
+        $client = self::getClient();
         $crawler = $client->request('GET', $this->pageCourse . '/-25');
         $this->assertResponseNotFound();
         self::getClient()->request('GET', $this->pageLesson . '/new');
@@ -53,16 +51,16 @@ class LessonControllerTest extends AbstractTest
         $this->assertResponseOk();
 
         // Перейдем на страницу первого курса
-        $link    = $crawler->filter('a.courseShow')->first()->link();
+        $link = $crawler->filter('a.courseShow')->first()->link();
         $crawler = $client->click($link);
         $this->assertResponseOk();
 
         // Посчитаем уроки до добавления нового
         $lessonsCountBefore = $crawler->filter('div.lessons')->count();
 
-        $code           = '00000';
-        $content        = 'Новый курс (редактирование)';
-        $number         = 'Описание курса (редактирование)';
+        $code = '00000';
+        $content = 'Новый курс (редактирование)';
+        $number = 'Описание курса (редактирование)';
         $overCharacters = 'sadjskadkasjdddddddasdkkkkkkkkksadjskadkasjdddddddasdkkkkkk
             kkkkkkkkkkasdkkkkkkkkkkkkkkkkkkasdllllllllllllllllllll
             llllllllllllllllllllllasdjjjjjjjjjjjjjjjjjjjjjjjjjjjjj
@@ -83,32 +81,32 @@ class LessonControllerTest extends AbstractTest
         // Выполним нажатие кнопки Сохранить
         // Проверка поля number на ввод текста
         $crawler = $client->submitForm('AddLesson', [
-            'lesson[name]'    => '289289',
+            'lesson[name]' => '289289',
             'lesson[content]' => $overCharacters,
-            'lesson[number]'  => 'jhjn',
+            'lesson[number]' => 'jhjn',
         ]);
-        $error0  = $crawler->filter('li');
+        $error0 = $crawler->filter('li');
         // Проверка поля number на ввод числа >1000
         $crawler = $client->submitForm('AddLesson', [
-            'lesson[name]'    => '289280',
+            'lesson[name]' => '289280',
             'lesson[content]' => $overCharacters,
-            'lesson[number]'  => 10001,
+            'lesson[number]' => 10001,
         ]);
-        $error1  = $crawler->filter('li');
+        $error1 = $crawler->filter('li');
         // Проверка поля number на ввод числа <0
         $crawler = $client->submitForm('AddLesson', [
-            'lesson[name]'    => '289289',
+            'lesson[name]' => '289289',
             'lesson[content]' => $overCharacters,
-            'lesson[number]'  => -10001,
+            'lesson[number]' => -10001,
         ]);
-        $error2  = $crawler->filter('li');
+        $error2 = $crawler->filter('li');
         // Проверка поля name на ввод больше 255 символов
         $crawler = $client->submitForm('AddLesson', [
-            'lesson[name]'    => $overCharacters,
+            'lesson[name]' => $overCharacters,
             'lesson[content]' => $overCharacters,
-            'lesson[number]'  => 676,
+            'lesson[number]' => 676,
         ]);
-        $error3  = $crawler->filter('li');
+        $error3 = $crawler->filter('li');
         // Вывод списка ошибок
         self::assertSame(
             [
@@ -116,16 +114,15 @@ class LessonControllerTest extends AbstractTest
                 'This value should be less than or equal to 1000.',
                 'This value is not valid.',
                 'This value is too long. It should have 255 characters or less.',
-            ]
-            ,
+            ],
             [$error0->text(), $error1->text(), $error2->text(), $error3->text()]);
         // Корректное добавление урока
         $crawler = $client->submitForm('AddLesson', [
-            'lesson[name]'    => '289289',
+            'lesson[name]' => '289289',
             'lesson[content]' => $overCharacters,
-            'lesson[number]'  => 676,
+            'lesson[number]' => 676,
         ]);
-        // Выберем один курс для возврата на страницу
+        // Выберем последний урок для возврата на страницу
         $lesson = static::getEntityManager()->getRepository(Lesson::class)->findByLastLesson();
         // Проверка редиректа на страницу курса
         self::assertTrue($client->getResponse()->isRedirect($this->pageCourse . '/' . $lesson[0]->getCourse()->getId()));
@@ -146,25 +143,25 @@ class LessonControllerTest extends AbstractTest
         $this->assertResponseOk();
 
         // Перейдем на страницу последнего добаленного курса
-        $link    = $crawler->filter('a.courseShow')->last()->link();
+        $link = $crawler->filter('a.courseShow')->last()->link();
         $crawler = $client->click($link);
         $this->assertResponseOk();
 
         // Перейдем на страницу последнего добаленного урока
         $linkLessons = $crawler->filter('a.lessonShow')->last()->link();
-        $crawler     = $client->click($linkLessons);
+        $crawler = $client->click($linkLessons);
         $this->assertResponseOk();
 
         // Переходим на страницу редактирования этого урока
-        $link    = $crawler->filter('a.LessonEdit')->link();
+        $link = $crawler->filter('a.LessonEdit')->link();
         $crawler = $client->click($link);
         $this->assertResponseOk();
 
         // Нажимаем кнопку редактировать
         $crawler = $client->submitForm('AddLesson', [
-            'lesson[name]'    => '289289',
+            'lesson[name]' => '289289',
             'lesson[content]' => 'Тест редактирование',
-            'lesson[number]'  => 289,
+            'lesson[number]' => 289,
         ]);
         // Выбираем из бд последний добавленный урок
         $lesson = self::getEntityManager()->getRepository(Lesson::class)->findByLastLesson();
@@ -189,12 +186,12 @@ class LessonControllerTest extends AbstractTest
 
         // Перейдем на страницу последнего добавленного курса
         $linkCourses = $crawler->filter('a.courseShow')->last()->link();
-        $crawler     = $client->click($linkCourses);
+        $crawler = $client->click($linkCourses);
         $this->assertResponseOk();
 
         // Перейдем на страницу последнего добавленного урока
         $linkLessons = $crawler->filter('a.lessonShow')->last()->link();
-        $crawler     = $client->click($linkLessons);
+        $crawler = $client->click($linkLessons);
         $this->assertResponseOk();
 
         // нажимаем кнопку удалить
@@ -209,25 +206,3 @@ class LessonControllerTest extends AbstractTest
         self::assertSame(count($lessonsBeforeDel), (count($lessonsAfterDel) + 1));
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

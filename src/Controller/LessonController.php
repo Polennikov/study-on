@@ -2,8 +2,8 @@
 
 namespace App\Controller;
 
-use App\Entity\Lesson;
 use App\Entity\Course;
+use App\Entity\Lesson;
 use App\Form\LessonType;
 use App\Repository\LessonRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -32,8 +32,8 @@ class LessonController extends AbstractController
      */
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
-        $id=$request->query->get('id');
-        $course = $entityManager->getRepository(Course::class)->find($id);
+        $course_id = $request->query->get('course_id');
+        $course = $entityManager->getRepository(Course::class)->find($course_id);
         $lesson = new Lesson();
         $lesson->setCourse($course);
         $form = $this->createForm(LessonType::class, $lesson);
@@ -49,7 +49,7 @@ class LessonController extends AbstractController
 
         return $this->render('lesson/new.html.twig', [
             'lesson' => $lesson,
-            'form'   => $form->createView(),
+            'form' => $form->createView(),
         ]);
     }
 
@@ -79,7 +79,7 @@ class LessonController extends AbstractController
 
         return $this->render('lesson/edit.html.twig', [
             'lesson' => $lesson,
-            'form'   => $form->createView(),
+            'form' => $form->createView(),
         ]);
     }
 

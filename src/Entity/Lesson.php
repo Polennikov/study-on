@@ -36,6 +36,7 @@ class Lesson
 
     /**
      * @ORM\ManyToOne(targetEntity=Course::class, inversedBy="lessons")
+     * * @ORM\JoinColumn(nullable=false)
      */
     private $course;
 
@@ -51,7 +52,7 @@ class Lesson
 
     public function setName(string $name): self
     {
-        $this->name= $name;
+        $this->name = $name;
 
         return $this;
     }

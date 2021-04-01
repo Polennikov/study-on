@@ -107,6 +107,7 @@ abstract class AbstractTest extends WebTestCase
     {
         $this->failOnResponseStatusCheck($response, $expectedCode, $message, $type);
     }
+
     /**
      * @param Response $response
      * @param string   $type
@@ -130,7 +131,7 @@ abstract class AbstractTest extends WebTestCase
                         $add = ' FORMATTED';
                     }
                 }
-                $title = '[' . $response->getStatusCode() . ']' . $add .' - ' . $content;
+                $title = '[' . $response->getStatusCode() . ']' . $add . ' - ' . $content;
             } else {
                 $title = $crawler->filter('title')->text();
             }
@@ -169,13 +170,13 @@ abstract class AbstractTest extends WebTestCase
 
         $err = $this->guessErrorMessageFromResponse($response, $type);
         if ($message) {
-            $message = rtrim($message, '.') . ". ";
+            $message = rtrim($message, '.') . '. ';
         }
 
         if (is_int($func)) {
-            $template = "Failed asserting Response status code %s equals %s.";
+            $template = 'Failed asserting Response status code %s equals %s.';
         } else {
-            $template = "Failed asserting that Response[%s] %s.";
+            $template = 'Failed asserting that Response[%s] %s.';
             $func = preg_replace('#([a-z])([A-Z])#', '$1 $2', $func);
         }
 
@@ -183,9 +184,9 @@ abstract class AbstractTest extends WebTestCase
 
         $max_length = 100;
         if (mb_strlen($err, 'utf-8') < $max_length) {
-            $message .= " " . $this->makeErrorOneLine($err);
+            $message .= ' ' . $this->makeErrorOneLine($err);
         } else {
-            $message .= " " . $this->makeErrorOneLine(mb_substr($err, 0, $max_length, 'utf-8') . '...');
+            $message .= ' ' . $this->makeErrorOneLine(mb_substr($err, 0, $max_length, 'utf-8') . '...');
             $message .= "\n\n" . $err;
         }
 
