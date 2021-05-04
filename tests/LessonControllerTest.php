@@ -4,12 +4,20 @@ namespace App\Tests;
 
 use App\DataFixtures\CourseFixtures;
 use App\Entity\Lesson;
+use Symfony\Component\Serializer\SerializerInterface;
 
 class LessonControllerTest extends AbstractTest
 {
     // Стартовая страница курсов
     public $pageCourse = '/course';
     public $pageLesson = '/lesson';
+    private $serializer;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->serializer = self::$container->get(SerializerInterface::class);
+    }
 
     // Переопределение метода для фикстур
     protected function getFixtures(): array
@@ -17,9 +25,34 @@ class LessonControllerTest extends AbstractTest
         return [CourseFixtures::class];
     }
 
+    // Проверка запретов доступа к страницам
+    public function testLessonPageNO(): void
+    {
+        $em = static::getEntityManager();
+        $lesson = $em->getRepository(Lesson::class)->findByOneLesson();
+        self::assertNotEmpty($lesson);
+        // Проверим все GET/POST запросы
+        self::getClient()->request('GET', $this->pageLesson . '/' . $lesson[0]->getId());
+        $this->assertResponseCode(302);
+        self::getClient()->request('GET', $this->pageLesson . '/' . $lesson[0]->getId() . '/edit');
+        $this->assertResponseCode(302);
+        self::getClient()->request('POST', $this->pageLesson . '/' . $lesson[0]->getId() . '/edit');
+        $this->assertResponseCode(302);
+    }
+
     // Проверка на корректный http-статус
     public function testLessonPageOk(): void
     {
+        $auth = new SecurityControllerTest();
+        // Авторизация под ролью ROLE_SUPER_ADMIN
+        $data = [
+            'email' => 'admin@mail.ru',
+            'password' => 'Admin48',
+        ];
+
+        $requestData = $this->serializer->serialize($data, 'json');
+        $crawler = $auth->authorization($requestData);
+
         $em = static::getEntityManager();
         $lesson = $em->getRepository(Lesson::class)->findByOneLesson();
         self::assertNotEmpty($lesson);
@@ -35,6 +68,16 @@ class LessonControllerTest extends AbstractTest
     // Проверка на ошибки перехода по страницам
     public function testLessonPageNotfound(): void
     {
+        $auth = new SecurityControllerTest();
+        // Авторизация под ролью ROLE_SUPER_ADMIN
+        $data = [
+            'email' => 'admin@mail.ru',
+            'password' => 'Admin48',
+        ];
+
+        $requestData = $this->serializer->serialize($data, 'json');
+        $crawler = $auth->authorization($requestData);
+
         $client = self::getClient();
         $crawler = $client->request('GET', $this->pageCourse . '/-25');
         $this->assertResponseNotFound();
@@ -45,10 +88,17 @@ class LessonControllerTest extends AbstractTest
     // Проверка добавления урока и проверка валидации
     public function testLessonCreate(): void
     {
+        $auth = new SecurityControllerTest();
+        // Авторизация под ролью ROLE_SUPER_ADMIN
+        $data = [
+            'email' => 'admin@mail.ru',
+            'password' => 'Admin48',
+        ];
+
+        $requestData = $this->serializer->serialize($data, 'json');
+        $crawler = $auth->authorization($requestData);
+
         $client = self::getClient();
-        // Стартовая точка на главной странице с курсами
-        $crawler = $client->request('GET', $this->pageCourse . '/');
-        $this->assertResponseOk();
 
         // Перейдем на страницу первого курса
         $link = $crawler->filter('a.courseShow')->first()->link();
@@ -137,10 +187,17 @@ class LessonControllerTest extends AbstractTest
     // Проверка редактирования урока
     public function testCourseEdit(): void
     {
+        $auth = new SecurityControllerTest();
+        // Авторизация под ролью ROLE_SUPER_ADMIN
+        $data = [
+            'email' => 'admin@mail.ru',
+            'password' => 'Admin48',
+        ];
+
+        $requestData = $this->serializer->serialize($data, 'json');
+        $crawler = $auth->authorization($requestData);
+
         $client = self::getClient();
-        // Стартовая точка на главной странице с курсами
-        $crawler = $client->request('GET', $this->pageCourse . '/');
-        $this->assertResponseOk();
 
         // Перейдем на страницу последнего добаленного курса
         $link = $crawler->filter('a.courseShow')->last()->link();
@@ -174,10 +231,17 @@ class LessonControllerTest extends AbstractTest
     // Проверка удаления урока
     public function testLessonDelete(): void
     {
+        $auth = new SecurityControllerTest();
+        // Авторизация под ролью ROLE_SUPER_ADMIN
+        $data = [
+            'email' => 'admin@mail.ru',
+            'password' => 'Admin48',
+        ];
+
+        $requestData = $this->serializer->serialize($data, 'json');
+        $crawler = $auth->authorization($requestData);
+
         $client = self::getClient();
-        // Стартовая точка на главной странице с курсами
-        $crawler = $client->request('GET', $this->pageCourse . '/');
-        $this->assertResponseOk();
 
         // Получим курсы из бд до удаления
         $lessonsBeforeDel = self::getEntityManager()->getRepository(Lesson::class)->findAll();

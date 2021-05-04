@@ -10,8 +10,11 @@
         </a>
     </div>
     <div class="row">
-        <a href="{{ path('lesson_edit', {'id': lesson.id}) }}" class="LessonEdit btn btn-secondary btn-lg mx-3">Редактировать</a>
-        {{ include('lesson/_delete_form.html.twig') }}
+        {% if is_granted('ROLE_SUPER_ADMIN') %}
+            <a href="{{ path('lesson_edit', {'id': lesson.id}) }}" class="LessonEdit btn btn-secondary btn-lg mx-3">Редактировать</a>
+            {{ include('lesson/_delete_form.html.twig') }}
+        {% endif %}
+
     </div>
     <hr/>
     <div class="card">

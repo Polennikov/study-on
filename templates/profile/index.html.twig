@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Profile{% endblock %}
+
+{% block body %}
+
+
+    <div class="container">
+        <div class="card mb-4 shadow-sm my-sm-3">
+            <h3 class="mx-auto my-sm-3">Личный кабинет</h3>
+            <div class="card-header">
+                <h4>Ваше имя:</h4>
+                <div id="name">{{ name }}</div>
+            </div>
+            <div class="card-body">
+                <h4>Ваш баланс:</h4>
+                <div id="balance"> {{ balance }}</div>
+            </div>
+            <div class="card-header">
+                {% if is_granted('ROLE_SUPER_ADMIN') %}
+                    <h4><div id="users"> Администратор</div></h4>
+
+                      {%  else %}
+                <h4><div id="users"> Пользователь</div></h4>
+                               {% endif %}
+
+            </div>
+        </div>
+    </div>
+
+    </div>
+{% endblock %}

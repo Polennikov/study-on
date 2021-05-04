@@ -21,7 +21,7 @@ class CourseFixtures extends Fixture
             $course = new Course();
             $course->setName($name);
             $course->setDescription('Курс ' . $name . ' поможет получить вам необходимые навыки в данной области');
-            $course->setCode(random_int(300, 400));
+            $course->setCode(random_int(400, 1000));
             $manager->persist($course);
 
             $count = random_int(3, 5);

@@ -60,8 +60,10 @@ abstract class AbstractTest extends WebTestCase
 
     /**
      * Load fixtures before test
+     *
+     * @param array $fixtures
      */
-    protected function loadFixtures(array $fixtures = [])
+    protected function loadFixtures(array $fixtures = []): void
     {
         $loader = new Loader();
 
@@ -83,27 +85,27 @@ abstract class AbstractTest extends WebTestCase
         $executor->execute($loader->getFixtures());
     }
 
-    public function assertResponseOk(?Response $response = null, ?string $message = null, string $type = 'text/html')
+    public function assertResponseOk(?Response $response = null, ?string $message = null, string $type = 'text/html'): void
     {
         $this->failOnResponseStatusCheck($response, 'isOk', $message, $type);
     }
 
-    public function assertResponseRedirect(?Response $response = null, ?string $message = null, string $type = 'text/html')
+    public function assertResponseRedirect(?Response $response = null, ?string $message = null, string $type = 'text/html'): void
     {
         $this->failOnResponseStatusCheck($response, 'isRedirect', $message, $type);
     }
 
-    public function assertResponseNotFound(?Response $response = null, ?string $message = null, string $type = 'text/html')
+    public function assertResponseNotFound(?Response $response = null, ?string $message = null, string $type = 'text/html'): void
     {
         $this->failOnResponseStatusCheck($response, 'isNotFound', $message, $type);
     }
 
-    public function assertResponseForbidden(?Response $response = null, ?string $message = null, string $type = 'text/html')
+    public function assertResponseForbidden(?Response $response = null, ?string $message = null, string $type = 'text/html'): void
     {
         $this->failOnResponseStatusCheck($response, 'isForbidden', $message, $type);
     }
 
-    public function assertResponseCode(int $expectedCode, ?Response $response = null, ?string $message = null, string $type = 'text/html')
+    public function assertResponseCode(int $expectedCode, ?Response $response = null, ?string $message = null, string $type = 'text/html'): void
     {
         $this->failOnResponseStatusCheck($response, $expectedCode, $message, $type);
     }
@@ -114,7 +116,7 @@ abstract class AbstractTest extends WebTestCase
      *
      * @return string
      */
-    public function guessErrorMessageFromResponse(Response $response, string $type = 'text/html')
+    public function guessErrorMessageFromResponse(Response $response, string $type = 'text/html'): string
     {
         try {
             $crawler = new Crawler();
@@ -124,7 +126,7 @@ abstract class AbstractTest extends WebTestCase
                 $add = '';
                 $content = $response->getContent();
 
-                if ('application/json' === $response->headers->get('Content-Type')) {
+                if ('Application/json' === $response->headers->get('Content-Type')) {
                     $data = json_decode($content);
                     if ($data) {
                         $content = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
@@ -147,7 +149,7 @@ abstract class AbstractTest extends WebTestCase
         $func = null,
         ?string $message = null,
         string $type = 'text/html'
-    ) {
+    ): void {
         if (null === $func) {
             $func = 'isOk';
         }
@@ -158,9 +160,9 @@ abstract class AbstractTest extends WebTestCase
 
         try {
             if (\is_int($func)) {
-                $this->assertEquals($func, $response->getStatusCode());
+                self::assertEquals($func, $response->getStatusCode());
             } else {
-                $this->assertTrue($response->{$func}());
+                self::assertTrue($response->{$func}());
             }
 
             return;
@@ -190,7 +192,7 @@ abstract class AbstractTest extends WebTestCase
             $message .= "\n\n" . $err;
         }
 
-        $this->fail($message);
+        self::fail($message);
     }
 
     private function makeErrorOneLine($text)

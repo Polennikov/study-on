@@ -15,6 +15,19 @@
         <a class="navbar-brand">
             StudyOn
         </a>
+        <div class="auth">
+            <a class="course_index btn btn-secondary btn-lg mx-3" href="{{ path('course_index') }}"> главная</a>
+            {% if app.user %}
+
+                <a class="profile btn btn-secondary btn-lg mx-3" href="{{ path('profile') }}"> профиль</a>
+                <a class="lessonShow btn btn-secondary btn-lg mx-3" href="{{ path('app_logout') }}"> выход</a>
+
+            {% else %}
+                <a class="register btn btn-secondary btn-lg mx-3" href="{{ path('register') }}">регистрация</a>
+                <a class="lessonShow btn btn-secondary btn-lg mx-3" href="{{ path('app_login') }}"> вход</a>
+            {% endif %}
+
+        </div>
     </nav>
 
     {% block body %}

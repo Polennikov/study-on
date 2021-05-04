@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Register{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <>
+            {% set formErrors = form.vars.errors.form.getErrors(true) %}
+            {% if formErrors|length %}
+                <div class="alert alert-danger">
+                    <h4>Предупреждения!</h4>
+                    <ul>
+                        {% for error in formErrors %}
+                            <li>{{ error.message }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% elseif error %}
+                <ul class="alert alert-danger">
+                    <h4>Предупреждения!</h4>
+                        <li>{{ error }}</li>
+                </ul>
+            {% endif %}
+
+
+            <h1 class="h3 mb-3 font-weight-normal">Регистрация</h1>
+            {{ form_start(form) }}
+            <h4>{{ form_label(form.email) }}</h4>
+            <div>{{ form_widget(form.email) }}</div>
+            <h4>{{ form_label(form.password.first) }}</h4>
+            <div>{{ form_widget(form.password.first) }}</div>
+            <h4>{{ form_label(form.password.second) }}</h4>
+            <div>{{ form_widget(form.password.second) }}</div>
+            <button type="submit" class="btn btn-lg btn-primary ">Регистрация</button>
+            {{ form_end(form) }}
+        </div>
+
+    </div>
+{% endblock %}
