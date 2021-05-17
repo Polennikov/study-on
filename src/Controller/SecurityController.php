@@ -69,14 +69,14 @@ class SecurityController extends AbstractController
                 // Формируем данные для запроса
                 $data = $serializer->serialize($form->getData(), 'json');
                 // Запрос к сервису для регистрации пользователя
-                $responseData = $billingClient->register($data);
-                if (200 == $responseData['code']) {
+                $response = $billingClient->register($data);
+                if (isset($response['token'])) {
                     // Создаем пользователя
                     $user = new User();
                     $user->setEmail($form->getData()['email']);
                     $user->setPassword($form->getData()['password']);
-                    $user->setApiToken($responseData['token']);
-
+                    $user->setApiToken($response['token']);
+                    $user->setRefreshToken($response['refresh_token']);
                     // Авторизация пользователя
                     $guardAuthenticatorHandler->authenticateUserAndHandleSuccess(
                         $user,
@@ -88,7 +88,7 @@ class SecurityController extends AbstractController
                     // Переход на страницу курсов
                     return $this->redirectToRoute('course_index');
                 } else {
-                    $error = $responseData['message'];
+                    $error = $response['message'];
                 }
             } catch (BillingUnavailableException $e) {
                 $error = $e->getMessage();

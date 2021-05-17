@@ -28,6 +28,7 @@ class SecurityControllerTest extends AbstractTest
             BillingClient::class,
             new BillingClientMock()
         );
+
     }
 
     public function authorization(string $data)
@@ -47,7 +48,7 @@ class SecurityControllerTest extends AbstractTest
         $form['email'] = $requestData['email'];
         $form['password'] = $requestData['password'];
         $client->submit($form);
-
+        //var_dump($client->getResponse());
         // Проверка перехода на страницу курсов
         $crawler = $client->followRedirect();
         $this->assertResponseCode(Response::HTTP_OK, $client->getResponse());
@@ -66,6 +67,7 @@ class SecurityControllerTest extends AbstractTest
             'password' => 'Artem48',
         ];
         $requestData = $this->serializer->serialize($data, 'json');
+
 
         // Авторизация пользователя и редирект на страницу курсов
         $crawler = $this->authorization($requestData);
@@ -147,6 +149,7 @@ class SecurityControllerTest extends AbstractTest
 
         // Проверяем ошибки
         $errors = $crawler->filter('li');
+        //var_dump($errors);
         self::assertCount(0, $errors);
 
         // Редирект на главную страницу course/

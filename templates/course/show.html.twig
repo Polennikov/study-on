@@ -3,8 +3,35 @@
 {% block title %}Course{% endblock %}
 
 {% block body %}
+    <!-- Flash message -->
+    {% for message in app.flashes('message') %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    {% endfor %}
+    <!-- END Flash message -->
     <h1>{{ course.name }}</h1>
+
     {{ course.description }}
+    {% if course.type == 'free' %}
+        <h5>Цена: бесплатно</h5>
+    {% else %}
+        <h5>Цена:{{ course.cost }}</h5>
+    {% endif %}
+
+    {% if course.purchased == 'yes' %}
+        {% if course.type == 'rent' %}
+            <h5>Арендован до {{ course.expires_at }}</h5
+        {% endif %}
+        {% if course.type == 'buy' %}
+            <h5>Куплен</h5
+        {% endif %}
+    {% endif %}
+
+
     <hr/>
     {% set vars = { 'lesson': lessons } %}
     {% include '/lesson/index.html.twig' with vars %}
@@ -13,10 +40,56 @@
         {% if is_granted('ROLE_SUPER_ADMIN') %}
             <a href="{{ path('course_edit', {'id': course.id}) }}" class="CourseEdit btn btn-primary btn-lg mr-3">Редактировать
                 курс</a>
-            <a href="{{ path('lesson_new', {'course_id': course.id}) }}" class="LessonAdd btn btn-primary btn-lg mr-3">Добавить предмет</a>
+            <a href="{{ path('lesson_new', {'course_id': course.id}) }}" class="LessonAdd btn btn-primary btn-lg mr-3">Добавить
+                предмет</a>
             {{ include('course/_delete_form.html.twig') }}
-        {% else %}
-            <a href="{{ path('course_index') }}" class="btn btn-secondary btn-lg mx-3">К списку курсов</a>
         {% endif %}
+        {% if is_granted('ROLE_USER') %}
+            {% if course.purchased == 'no' %}
+
+                {% if course.type == 'buy' %}
+                    {% if balance >=  course.cost %}
+                        <a id="but" data-toggle="modal" href="#payModal-{{ course.code }}" class="but btn btn-primary btn-lg mx-3">Купить</a>
+                        {% endif %}
+                {% elseif course.type == 'rent' %}
+                    {% if balance >=  course.cost %}
+                        <a id="but" data-toggle="modal" href="#payModal-{{ course.code }}" class="but btn btn-primary btn-lg mx-3">Арендовать</a>
+                {% endif %}
+                {% else %}
+                        <a id="but" data-toggle="modal" href="#payModal-{{ course.code }}" class="but btn btn-primary btn-lg mx-3">Добавить бесплатно</a>
+                {% endif %}
+            {% endif %}
+            <a href="{{ path('course_index') }}" class="CourseEdit btn btn-secondary btn-lg mx-3">К списку курсов</a>
+            {% else %}
+                <a href="{{ path('course_index') }}" class="btn btn-secondary btn-lg mx-3">К списку курсов</a>
+        {% endif %}
+
+        <!-- Modal -->
+        <div class="modal fade" id="payModal-{{ course.code }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">
+                            Подтвердите действие по курсу {{ course.name}}
+                        </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Вы уверены, что хотите совершить покупку?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                        <a id="modalOk" class="modalOk btn btn-outline-primary" role="button"
+                                   href="{{ path('course_pay', {'id': course.code}) }}">Подтвердить</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- END Modal -->
+
+
+
     </div>
 {% endblock %}

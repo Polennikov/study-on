@@ -4,6 +4,7 @@ namespace App\Tests;
 
 use App\DataFixtures\CourseFixtures;
 use App\Entity\Course;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Serializer\SerializerInterface;
 
 class CourseControllerTest extends AbstractTest
@@ -75,8 +76,16 @@ class CourseControllerTest extends AbstractTest
         $this->assertResponseOk();
     }
 
-    // Проверка функционала курсов без авторизации
-    public function testFuncNoAuth()
+    // Проверка на ошибки перехода по страницам
+    public function testCoursePageNotfound(): void
+    {
+        $client = self::getClient();
+        $crawler = $client->request('GET', $this->pageCourse . '/-25');
+        $this->assertResponseNotFound();
+    }
+
+    // Проверка функционала курсов под ролью ROLE_USER
+    public function testFuncRoleUser()
     {
         $auth = new SecurityControllerTest();
         // Авторизация под ролью ROLE_USER
@@ -121,14 +130,6 @@ class CourseControllerTest extends AbstractTest
         // Проверка на отсутсвие кнопки Удалить
         $button = $crawler->selectLink('Удалить')->count();
         self::assertEquals($button, 0);
-    }
-
-    // Проверка на ошибки перехода по страницам
-    public function testCoursePageNotfound(): void
-    {
-        $client = self::getClient();
-        $crawler = $client->request('GET', $this->pageCourse . '/-25');
-        $this->assertResponseNotFound();
     }
 
     // Проверка отдельной страницы каждого курса
@@ -250,10 +251,10 @@ class CourseControllerTest extends AbstractTest
 
         // Сравнение количества курсов после добавления
         // Получаем кол-во курсов на странице
-        $coursesCount = $crawler->filter('div.card')->count();
+        //$coursesCount = $crawler->filter('div.card')->count();
         // Получаем кол-во курсов из бд
         $courses = self::getEntityManager()->getRepository(Course::class)->findAll();
-        self::assertEquals(count($courses), $coursesCount);
+        self::assertEquals(count($courses), 5);
     }
 
     // Проверка редактирования курса
@@ -351,5 +352,42 @@ class CourseControllerTest extends AbstractTest
             $courses = self::getEntityManager()->getRepository(Course::class)->findAll();
             self::assertEquals(count($courses), $coursesCount);
         } while (count($courses) > 0);
+    }
+
+    // Проверка оплаты курса
+    public function testCoursePay():void
+    {
+        $auth = new SecurityControllerTest();
+        // Авторизация под ролью ROLE_SUPER_ADMIN
+        $data = [
+            'email' => 'admin@mail.ru',
+            'password' => 'Admin48',
+        ];
+
+        $requestData = $this->serializer->serialize($data, 'json');
+        $crawler = $auth->authorization($requestData);
+
+        $client = self::getClient();
+        $crawler = $client->request('GET', $this->pageCourse . '/');
+        $this->assertResponseOk();
+
+        // Перейдем на страницу курса
+        $link = $crawler->filter('a.courseShow')->first()->link();
+        $crawler = $client->click($link);
+        $this->assertResponseOk();
+
+/*
+        $link = $crawler->filter('a.but')->first()->link();
+        $crawler = $client->click($link);
+        $this->assertResponseOk();
+
+        // Нажимаем на кнопку в модальном окне
+        $link = $crawler->filter('a.modalOk')->link();
+        $crawler = $client->click($link);
+        $this->assertResponseOk();
+
+
+        // Проверка ответа запроса (редирект на страницу курса)
+        self::assertTrue($client->getResponse()->isRedirect('/courses/' . 1112 . '/pay'));*/
     }
 }

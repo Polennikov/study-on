@@ -14,9 +14,20 @@
                         </div>
                         <div class="card-body">
                             {{ course.description }}
+
                             <div class="mt-3">
                                 <a class="courseShow" href="{{ path('course_show', {'id': course.id}) }}">Пройти</a>
                             </div>
+                        </div>
+                        <div class="card-header">
+                            {% if course.expires_at %}
+                                <h4>{{ course.purchased }}  до  {{ course.expires_at }}</h4>
+                            {% else %}
+                                <h4>{{ course.purchased }}</h4>
+                            {% endif %}
+
+
+                            <h4>{{ course.cost }}</h4>
                         </div>
                     </div>
                 </div>

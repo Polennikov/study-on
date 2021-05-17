@@ -92,13 +92,19 @@ class UserAuthenticator extends AbstractFormLoginAuthenticator
 
         // Проверка ответа и формирование пользователя
         if ($result) {
-            $tokenParts = explode('.', $result['token']);
-            $payload = json_decode(base64_decode($tokenParts[1]), true);
+            $response = explode('.', $result['token']);
+            $payload = json_decode(base64_decode($response[1]), true);
             $user = new User();
             $user->setApiToken($result['token']);
             $user->setEmail($payload['username']);
             $user->setRoles($payload['roles']);
-
+            $user->setRefreshToken($result['refresh_token']);
+            try {
+                $result = $this->billingClient->getCurrentUser($user);
+            } catch (BillingUnavailableException $e) {
+                throw new \Exception($e->getMessage());
+            }
+            $user->setBalance($result['balance']);
             return $user;
         }
     }

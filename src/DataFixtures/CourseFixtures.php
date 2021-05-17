@@ -17,11 +17,12 @@ class CourseFixtures extends Fixture
             'Администрирование вмногопользовательских системах',
             'Защита информации',
         ];
+        $code=1111;
         foreach ($courses as $name) {
             $course = new Course();
             $course->setName($name);
             $course->setDescription('Курс ' . $name . ' поможет получить вам необходимые навыки в данной области');
-            $course->setCode(random_int(400, 1000));
+            $course->setCode($code++);
             $manager->persist($course);
 
             $count = random_int(3, 5);

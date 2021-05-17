@@ -2,6 +2,10 @@
 
 namespace App\Security;
 
+use App\Service\BillingClient;
+use App\Service\DecodeJWT;
+use DateInterval;
+use DateTime;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
@@ -10,6 +14,13 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
 
 class UserProvider implements UserProviderInterface, PasswordUpgraderInterface
 {
+    private $decodeJwt;
+    private $billingClient;
+    public function __construct(DecodeJWT $decodeJwt, BillingClient $billingClient)
+    {
+        $this->decodeJwt = $decodeJwt;
+        $this->billingClient = $billingClient;
+    }
     /**
      * Symfony calls this method if you use features like switch_user
      * or remember_me.
@@ -48,9 +59,23 @@ class UserProvider implements UserProviderInterface, PasswordUpgraderInterface
             throw new UnsupportedUserException(sprintf('Invalid user class "%s".', get_class($user)));
         }
 
-        // Return a User object after making sure its data is "fresh".
+/*        // Return a User object after making sure its data is "fresh".
         // Or throw a UsernameNotFoundException if the user no longer exists.
-        // throw new \Exception('TODO: fill in refreshUser() inside '.__FILE__);
+        // throw new \Exception('TODO: fill in refreshUser() inside '.__FILE__);*/
+        $response = $this->decodeJwt->decodeJWT($user->getApiToken());
+        $exp = (new DateTime())->setTimestamp($response['exp']);
+        $time = (new DateTime())->add(new DateInterval('PT1M'));
+
+        if ($time >= $exp) {
+            try {
+                $refreshToken = $user->getRefreshToken();
+                $response = $this->billingClient->refresh($refreshToken);
+                $user->setApiToken($response['token']);
+                $user->setRefreshToken($response['refresh_token']);
+            } catch (BillingUnavailableException $e) {
+                throw new \Exception($e->getMessage());
+            }
+        }
 
         return $user;
     }

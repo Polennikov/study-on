@@ -17,6 +17,8 @@ class User implements UserInterface
 
     private $roles = [];
 
+    private $refreshToken;
+
     public function getEmail(): ?string
     {
         return $this->email;
@@ -94,7 +96,7 @@ class User implements UserInterface
         // $this->plainPassword = null;
     }
 
-    public function getBalance(): float
+    public function getBalance(): ?string
     {
         return $this->balance;
     }
@@ -118,14 +120,15 @@ class User implements UserInterface
         return $this;
     }
 
-    public static function fromDto(UserDto $userDto): self
+    public function getRefreshToken(): string
     {
-        $user = new self();
-        $user->setEmail($userDto->email);
-        $user->setRoles(['ROLE_USER']);
-        $user->setPassword($userDto->password);
-        $user->setBalance(0);
-
-        return $user;
+        return $this->refreshToken;
     }
+
+    public function setRefreshToken(string $refreshToken): self
+    {
+        $this->refreshToken = $refreshToken;
+        return $this;
+    }
+
 }
