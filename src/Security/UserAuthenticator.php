@@ -105,6 +105,7 @@ class UserAuthenticator extends AbstractFormLoginAuthenticator
                 throw new \Exception($e->getMessage());
             }
             $user->setBalance($result['balance']);
+
             return $user;
         }
     }

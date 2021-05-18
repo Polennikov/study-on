@@ -3,10 +3,18 @@
 {% block title %}New Lesson{% endblock %}
 
 {% block body %}
-    <h1>Новый урок</h1>
-    <h3><a href="{{ path('course_show', {'id': lesson.course.id}) }}">
-            {{ lesson.course.getName }}
-        </a>
-    </h3>
-    {{ include('lesson/_form.html.twig') }}
+    <div class="container">
+        <div class="card mb-4 shadow-sm my-sm-3">
+            <h3 class="mx-auto my-sm-3">Новый урок</h3>
+            <div class="card-header">
+                <a href="{{ path('course_show', {'id': lesson.course.id}) }}">
+                    {{ lesson.course.getName }}
+                </a>
+            </div>
+
+            <div class="card-body">
+                {{ include('lesson/_form.html.twig') }}
+            </div>
+        </div>
+    </div>
 {% endblock %}

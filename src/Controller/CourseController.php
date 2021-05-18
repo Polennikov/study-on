@@ -4,17 +4,17 @@ namespace App\Controller;
 
 use App\Entity\Course;
 use App\Entity\Lesson;
+use App\Exception\BillingUnavailableException;
 use App\Form\CourseType;
-use App\Service\BillingClient;
 use App\Repository\CourseRepository;
 use App\Repository\LessonRepository;
+use App\Service\BillingClient;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Serializer\SerializerInterface;
-use App\Exception\BillingUnavailableException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Serializer\SerializerInterface;
 
 /**
  * @Route("/course")
@@ -38,43 +38,42 @@ class CourseController extends AbstractController
                 $transaction = [];
             }
             $coursesBilling = $billingClient->getAllCourse();
-            $coursesData=[];
+            $coursesData = [];
             foreach ($coursesBilling as $courseBilling) {
                 // Ищем курс, который вернулся с сервиса оплаты, в репозитории
                 $course = $courseRepository->findOneBy(['code' => $courseBilling['code']]);
                 if ($course) {
                     //var_dump( $course->getId());
-                    $cost       = null;
-                    $type       = null;
-                    $purchased  = null;
+                    $cost = null;
+                    $type = null;
+                    $purchased = null;
                     $expires_at = null;
-                    if ($this->courseFindBuy($course->getCode(), $transaction) != 'null') {
+                    if ('null' != $this->courseFindBuy($course->getCode(), $transaction)) {
                         $type = $courseBilling['type'];
-                        if ($type == 'free') {
+                        if ('free' == $type) {
                             $purchased = 'бесплатно';
                         }
-                        if ($type == 'rent') {
-                            $purchased  = 'арендовано';
-                            $cost       = $courseBilling['cost'];
+                        if ('rent' == $type) {
+                            $purchased = 'арендовано';
+                            $cost = $courseBilling['cost'];
                             $expires_at = $this->courseFind($course->getCode(), $transaction);
                         }
-                        if ($type == 'buy') {
-                            $cost      = $courseBilling['cost'];
+                        if ('buy' == $type) {
+                            $cost = $courseBilling['cost'];
                             $purchased = 'куплено';
                         }
                     } else {
                         $type = $courseBilling['type'];
-                        if ($type == 'free') {
+                        if ('free' == $type) {
                             $purchased = 'бесплатно';
                         }
-                        if ($type == 'rent') {
+                        if ('rent' == $type) {
                             $purchased = 'аренда';
-                            $cost      = $courseBilling['cost'];
-
+                            $cost = $courseBilling['cost'];
                         }
-                        if ($type == 'buy') {
+                        if ('buy' == $type) {
                             $purchased = 'покупка';
-                            $cost      = $courseBilling['cost'];
+                            $cost = $courseBilling['cost'];
                         }
                     }
                     $coursesData[] = $this->courseFilter(
@@ -86,23 +85,19 @@ class CourseController extends AbstractController
                         $cost,
                         $purchased,
                         $expires_at);
-
                 }
             }
 
             return $this->render('course/index.html.twig', [
                 'courses' => $coursesData,
             ]);
-
-        } catch
-        (BillingUnavailableException $e) {
+        } catch (BillingUnavailableException $e) {
             throw new BillingUnavailableException($e->getMessage());
         }
-
     }
 
     private function courseFind(
-        int $code,
+        string $code,
         array $transaction
     ): string {
         foreach ($transaction as $item) {
@@ -115,7 +110,7 @@ class CourseController extends AbstractController
     }
 
     private function courseFindBuy(
-        int $code,
+        string $code,
         array $transaction
     ): string {
         foreach ($transaction as $item) {
@@ -138,21 +133,21 @@ class CourseController extends AbstractController
         ?string $expires_at
     ): array {
         return [
-            'id'          => $id,
-            'code'        => $code,
-            'name'        => $name,
+            'id' => $id,
+            'code' => $code,
+            'name' => $name,
             'description' => $description,
-            'type'        => $type,
-            'cost'        => $cost,
-            'purchased'   => $purchased,
-            'expires_at'  => $expires_at,
+            'type' => $type,
+            'cost' => $cost,
+            'purchased' => $purchased,
+            'expires_at' => $expires_at,
         ];
     }
 
     /**
      * @Route("/new", name="course_new", methods={"GET","POST"})
      */
-    public function new(Request $request): Response
+    public function new(Request $request, BillingClient $billingClient, SerializerInterface $serializer): Response
     {
         $this->denyAccessUnlessGranted(
             'ROLE_SUPER_ADMIN',
@@ -161,20 +156,39 @@ class CourseController extends AbstractController
         );
 
         $course = new Course();
-        $form   = $this->createForm(CourseType::class, $course);
+        $form = $this->createForm(CourseType::class, $course);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->persist($course);
-            $entityManager->flush();
+            try {
+                $entityManager = $this->getDoctrine()->getManager();
+                $entityManager->persist($course);
+                $entityManager->flush();
+
+                // Запрос в сервис billing для создания курса
+                $dataRequest = [
+                'type' => $form->get('type')->getNormData(),
+                'name' => $form->get('name')->getNormData(),
+                'code' => $form->get('code')->getNormData(),
+                'cost' => $form->get('cost')->getNormData(),
+            ];
+                $billingClient->newCourse($this->getUser(), $serializer->serialize($dataRequest, 'json'));
+            } catch (BillingUnavailableException $e) {
+                // flash message
+                $this->addFlash('message', 'Возникла ошибка!');
+
+                return $this->render('course/new.html.twig', [
+                    'course' => $course,
+                    'form' => $form->createView(),
+                ]);
+            }
 
             return $this->redirectToRoute('course_index');
         }
 
         return $this->render('course/new.html.twig', [
             'course' => $course,
-            'form'   => $form->createView(),
+            'form' => $form->createView(),
         ]);
     }
 
@@ -190,6 +204,11 @@ class CourseController extends AbstractController
         );
         // Откуда перешли на данную страницу для обратного редиректа
         $referer = $request->headers->get('referer');
+
+        if (null === $referer) {
+            return $this->redirectToRoute('course_index');
+        }
+
         $courseCode = $request->get('id');
         try {
             $billingClient->payCourse($this->getUser(), $courseCode);
@@ -212,14 +231,14 @@ class CourseController extends AbstractController
             $lessons = $this->getDoctrine()
                 ->getRepository(Lesson::class)
                 ->findByIdLesson($course);
-            //
+
             $courseBilling = $billingClient->getCourse($course->getCode());
-            //
+
             if ($this->getUser()) {
                 $transaction = $billingClient->getTransactionUserPayment($this->getUser(),
-                    'type=payment&code='.$course->getCode().'&skip_expired=1');
-                if (isset($transaction[0]) && $transaction[0]['type'] == 1) {
-                    if ($courseBilling['type'] == 'rent' && isset($transaction[0]['validityPeriod'])) {
+                    'type=payment&code=' . $course->getCode() . '&skip_expired=1');
+                if (isset($transaction[0]) && 1 == $transaction[0]['type']) {
+                    if ('rent' == $courseBilling['type'] && isset($transaction[0]['validityPeriod'])) {
                         $coursesData = $this->courseFilter(
                             $course->getId(),
                             $course->getCode(),
@@ -232,12 +251,12 @@ class CourseController extends AbstractController
                         );
 
                         return $this->render('course/show.html.twig', [
-                            'balance'=>$this->getUser()->getBalance(),
-                            'course'  => $coursesData,
+                            'balance' => $this->getUser()->getBalance(),
+                            'course' => $coursesData,
                             'lessons' => $lessons,
                         ]);
                     }
-                    if ($courseBilling['type'] == 'buy') {
+                    if ('buy' == $courseBilling['type']) {
                         $coursesData = $this->courseFilter(
                             $course->getId(),
                             $course->getCode(),
@@ -250,12 +269,12 @@ class CourseController extends AbstractController
                         );
 
                         return $this->render('course/show.html.twig', [
-                            'balance'=>$this->getUser()->getBalance(),
-                            'course'  => $coursesData,
+                            'balance' => $this->getUser()->getBalance(),
+                            'course' => $coursesData,
                             'lessons' => $lessons,
                         ]);
                     }
-                    if ($courseBilling['type'] == 'free') {
+                    if ('free' == $courseBilling['type']) {
                         $coursesData = $this->courseFilter(
                             $course->getId(),
                             $course->getCode(),
@@ -268,12 +287,12 @@ class CourseController extends AbstractController
                         );
 
                         return $this->render('course/show.html.twig', [
-                            'balance'=>$this->getUser()->getBalance(),
-                            'course'  => $coursesData,
+                            'balance' => $this->getUser()->getBalance(),
+                            'course' => $coursesData,
                             'lessons' => $lessons,
                         ]);
                     }
-                } else{
+                } else {
                     $coursesData = $this->courseFilter(
                         $course->getId(),
                         $course->getCode(),
@@ -284,15 +303,14 @@ class CourseController extends AbstractController
                         'no',
                         null
                     );
+
                     return $this->render('course/show.html.twig', [
-                        'balance'=>$this->getUser()->getBalance(),
-                        'course'  => $coursesData,
+                        'balance' => $this->getUser()->getBalance(),
+                        'course' => $coursesData,
                         'lessons' => $lessons,
                     ]);
                 }
-
             } else {
-
                 $coursesData = $this->courseFilter(
                     $course->getId(),
                     $course->getCode(),
@@ -305,44 +323,64 @@ class CourseController extends AbstractController
                 );
 
                 return $this->render('course/show.html.twig', [
-                    'balance'=>null,
-                    'course'  => $coursesData,
+                    'balance' => null,
+                    'course' => $coursesData,
                     'lessons' => $lessons,
                 ]);
             }
-
-
         } catch (AccessDeniedException $e) {
             throw new \Exception($e->getMessage());
         } catch (BillingUnavailableException $e) {
             throw new \Exception($e->getMessage());
         }
-
     }
 
     /**
      * @Route("/{id}/edit", name="course_edit", methods={"GET","POST"})
      */
-    public function edit(Request $request, Course $course): Response
+    public function edit(Request $request, BillingClient $billingClient, Course $course, SerializerInterface $serializer): Response
     {
         $this->denyAccessUnlessGranted(
             'ROLE_SUPER_ADMIN',
             $this->getUser(),
             'У вас нет доступа к этой странице'
         );
+        // Запрос с billing для получения информации о курсе
+        $courseData = $billingClient->getCourse($course->getCode());
+        $courseCode = $course->getCode();
 
         $form = $this->createForm(CourseType::class, $course);
+        $form->get('type')->setData($courseData['type']);
+        $form->get('cost')->setData($courseData['cost'] ?? 0);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $dataRequest = [
+                'type' => $form->get('type')->getNormData(),
+                'name' => $form->get('name')->getNormData(),
+                'code' => $form->get('code')->getNormData(),
+                'cost' => $form->get('cost')->getNormData(),
+            ];
+            $responseData = $billingClient->editCourse(
+                $this->getUser(),
+                $courseCode,
+                $serializer->serialize($dataRequest, 'json')
+            );
 
-            return $this->redirect('/course/'.$course->getId());
+            // Если в сервисе billing успешно изменился курс, то сохраняем изменения
+            if (isset($responseData['success'])) {
+                $this->getDoctrine()->getManager()->flush();
+
+                return $this->redirect('/course/' . $course->getId());
+            } else {
+                // flash message
+                $this->addFlash('message', $responseData['message']);
+            }
         }
 
         return $this->render('course/edit.html.twig', [
             'course' => $course,
-            'form'   => $form->createView(),
+            'form' => $form->createView(),
         ]);
     }
 
@@ -359,7 +397,7 @@ class CourseController extends AbstractController
             'У вас нет доступа к этой странице'
         );
 
-        if ($this->isCsrfTokenValid('delete'.$course->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $course->getId(), $request->request->get('_token'))) {
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->remove($course);
             $entityManager->flush();
@@ -367,6 +405,4 @@ class CourseController extends AbstractController
 
         return $this->redirectToRoute('course_index');
     }
-
-
 }

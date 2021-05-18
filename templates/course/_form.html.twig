@@ -17,6 +17,15 @@
     {{ form_widget(form.code) }}
     {{ form_errors(form.code) }}
 </div>
-
+<label>Тип курса</label>
+<div class="form-group">
+    {{ form_widget(form.type) }}
+    {{ form_errors(form.type) }}
+</div>
+<label>Стоимость</label>
+<div class="form-group">
+    {{ form_widget(form.cost) }}
+    {{ form_errors(form.cost) }}
+</div>
 <button id="AddCourse" class="btn btn-primary btn-lg">{{ button_label|default('Сохранить') }}</button>
 {{ form_end(form) }}

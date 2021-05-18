@@ -4,7 +4,6 @@ namespace App\Tests;
 
 use App\DataFixtures\CourseFixtures;
 use App\Entity\Course;
-use PHPUnit\Framework\TestCase;
 use Symfony\Component\Serializer\SerializerInterface;
 
 class CourseControllerTest extends AbstractTest
@@ -148,115 +147,6 @@ class CourseControllerTest extends AbstractTest
         }
     }
 
-    // Проверка добавления курса и проверка валидации
-    public function testCourseCreate(): void
-    {
-        $auth = new SecurityControllerTest();
-        // Авторизация под ролью ROLE_SUPER_ADMIN
-        $data = [
-            'email' => 'admin@mail.ru',
-            'password' => 'Admin48',
-        ];
-
-        $requestData = $this->serializer->serialize($data, 'json');
-        $crawler = $auth->authorization($requestData);
-
-        $client = self::getClient();
-        $crawler = $client->request('GET', $this->pageCourse . '/');
-        $this->assertResponseOk();
-
-        // Перейдём на страницу создания нового курса
-        $link = $crawler->filter('a.NewCourse')->link();
-        $client->click($link);
-        $this->assertResponseOk();
-        $overCharacters = 'sadjskadkasjdddddddasdkkkkkkkkksadjskadkasjdddddddasdkkkkkk
-            kkkkkkkkkkasdkkkkkkkkkkkkkkkkkkasdllllllllllllllllllll
-            llllllllllllllllllllllasdjjjjjjjjjjjjjjjjjjjjjjjjjjjjj
-            jjjjjjjjjjjjjjjasdllllllllllllllllllllllllllllsadkasdk
-            asdknqowhduiqbwdnoskznmdoasmpodpasmdpamsdsadddddddddda
-            sssssssssssssssssssssssssssssssssssssssssssssssddddddd
-            dddddddddddddddddddddddddddddddddddddddddddddddddddddd
-            dddddddddddddddddddddddddddsssssssssssssssssssssssssss
-            ssssssssssssssssssssssssssssssssssssssssssssssssssssss
-            ssssssssssssssssssssssssssssssssssssssssssssssssssssss
-            sssssadjskadkasjdddddddasdkkkkkkkkkkkkkkkkasdkkkkkkkkk
-            kkkkkkkkkasdllllllllllllllllllllllllllllllllllllllllll
-            asdjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjasdllll
-            llllllllllllllllllllllllsadkasdkasdknqowhduiqbwdnoskzn
-            mdoasmpodpasmdpamsdsaddddddddddassssssssssssssssssssss
-            ssssssssssssssssssssssssdddddddddddddddddddddddddddddd
-            dddddddddddddddddddddddddddddddddddddddddddddddddddddd
-            ddddssssssssssssssssssssssssssssssssssssssssssssssssss
-            sssssssssssssssssssssssguyguygyugggggggggggggggggggggg
-            kkkkkkkasdkkkkkkkkkkkkkkkkkkasdllllllllllllllllllllllllll
-            llllllllllllllllasdjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj
-            jjjjasdllllllllllllllllllllllllllllsadkasdkasdknqowhduiqbwd
-            noskznmdoasmpodpasmdpamsduiknmi7ymimyimyimkkkkkkkkkkkkkkkkkkkkkkk';
-
-        // Проверка поля поля name на количество допустимых символов
-        // Перейдём на страницу создания нового курса
-        $link = $crawler->filter('a.NewCourse')->link();
-        $client->click($link);
-        $this->assertResponseOk();
-        // Выполним нажатие кнопки Сохранить
-        $crawler = $client->submitForm('AddCourse', [
-            'course[code]' => '289289',
-            'course[name]' => $overCharacters,
-            'course[description]' => 'Тест',
-        ]);
-        // считывание ошибки с формы
-        $error0 = $crawler->filter('li');
-
-        // Проверка поля поля  на количество code на уникальность
-        // Выберем из базы один курс
-        $em = static::getEntityManager();
-        $course = $em->getRepository(Course::class)->findByOneCourse();
-        // Выполним нажатие кнопки Сохранить
-        $crawler = $client->submitForm('AddCourse', [
-            'course[code]' => $course[0]->getCode(),
-            'course[name]' => 'Тест',
-            'course[description]' => 'Тест',
-        ]);
-        // считывание ошибки с формы
-        $error1 = $crawler->filter('li');
-
-        // Проверка поля поля  на количество description допустимых символов
-        $crawler = $client->submitForm('AddCourse', [
-            'course[code]' => '289289',
-            'course[name]' => 'Тест',
-            'course[description]' => $overCharacters,
-        ]);
-        $error2 = $crawler->filter('li');
-        // Вывод списка ошибок
-        self::assertSame(
-            [
-                'This value is too long. It should have 255 characters or less.',
-                'Поле должно быть уникальным',
-                'This value is too long. It should have 1000 characters or less.',
-            ],
-            [$error0->text(), $error1->text(), $error2->text()]);
-
-        // Выполним нажатие кнопки Сохранить
-        $client->submitForm('AddCourse',
-            [
-                'course[code]' => '0887005',
-                'course[name]' => 'Новый курс',
-                'course[description]' => 'Описание курса',
-            ]);
-        // Проверка перехода на главную страницу
-        self::assertTrue($client->getResponse()->isRedirect($this->pageCourse . '/'));
-        // Переход на галвную страницу
-        $crawler = $client->followRedirect();
-        $this->assertResponseOk();
-
-        // Сравнение количества курсов после добавления
-        // Получаем кол-во курсов на странице
-        //$coursesCount = $crawler->filter('div.card')->count();
-        // Получаем кол-во курсов из бд
-        $courses = self::getEntityManager()->getRepository(Course::class)->findAll();
-        self::assertEquals(count($courses), 5);
-    }
-
     // Проверка редактирования курса
     public function testCourseEdit(): void
     {
@@ -354,8 +244,27 @@ class CourseControllerTest extends AbstractTest
         } while (count($courses) > 0);
     }
 
-    // Проверка оплаты курса
-    public function testCoursePay():void
+    // Тест недоступности создания курса с ролью пользователя
+    public function testCourseNewRoleUser()
+    {
+        $auth = new SecurityControllerTest();
+        // Авторизация под ролью ROLE_USER
+        $data = [
+            'email' => 'artem@mail.ru',
+            'password' => 'Artem48',
+        ];
+
+        $requestData = $this->serializer->serialize($data, 'json');
+        $crawler = $auth->authorization($requestData);
+
+        // Переходим на страницу формы
+        $createForm = $crawler->filter('a.NewCourse');
+        // Проверка кнопки
+        self::assertEmpty($createForm);
+    }
+
+    // Проверка добавления курса и проверка валидации
+    public function testCourseNewRoleAdmin()
     {
         $auth = new SecurityControllerTest();
         // Авторизация под ролью ROLE_SUPER_ADMIN
@@ -368,26 +277,136 @@ class CourseControllerTest extends AbstractTest
         $crawler = $auth->authorization($requestData);
 
         $client = self::getClient();
-        $crawler = $client->request('GET', $this->pageCourse . '/');
+
+        $overCharacters = 'sadjskadkasjdddddddasdkkkkkkkkksadjskadkasjdddddddasdkkkkkk
+            kkkkkkkkkkasdkkkkkkkkkkkkkkkkkkasdllllllllllllllllllll
+            llllllllllllllllllllllasdjjjjjjjjjjjjjjjjjjjjjjjjjjjjj
+            jjjjjjjjjjjjjjjasdllllllllllllllllllllllllllllsadkasdk
+            asdknqowhduiqbwdnoskznmdoasmpodpasmdpamsdsadddddddddda
+            sssssssssssssssssssssssssssssssssssssssssssssssddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddsssssssssssssssssssssssssss
+            ssssssssssssssssssssssssssssssssssssssssssssssssssssss
+            ssssssssssssssssssssssssssssssssssssssssssssssssssssss
+            sssssadjskadkasjdddddddasdkkkkkkkkkkkkkkkkasdkkkkkkkkk
+            kkkkkkkkkasdllllllllllllllllllllllllllllllllllllllllll
+            asdjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjasdllll
+            llllllllllllllllllllllllsadkasdkasdknqowhduiqbwdnoskzn
+            mdoasmpodpasmdpamsdsaddddddddddassssssssssssssssssssss
+            ssssssssssssssssssssssssdddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddssssssssssssssssssssssssssssssssssssssssssssssssss
+            sssssssssssssssssssssssguyguygyugggggggggggggggggggggg
+            kkkkkkkasdkkkkkkkkkkkkkkkkkkasdllllllllllllllllllllllllll
+            llllllllllllllllasdjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj
+            jjjjasdllllllllllllllllllllllllllllsadkasdkasdknqowhduiqbwd
+            noskznmdoasmpodpasmdpamsduiknmi7ymimyimyimkkkkkkkkkkkkkkkkkkkkkkk';
+
+        // Проверка поля поля name на количество допустимых символов
+        // Перейдём на страницу создания нового курса
+        $link = $crawler->filter('a.NewCourse')->link();
+        $client->click($link);
+        $this->assertResponseOk();
+        // Выполним нажатие кнопки Сохранить
+        $crawler = $client->submitForm('AddCourse', [
+            'course[code]' => '289289',
+            'course[name]' => $overCharacters,
+            'course[description]' => 'Тест',
+        ]);
+        // считывание ошибки с формы
+        $error0 = $crawler->filter('li');
+
+        // Проверка поля поля  на количество code на уникальность
+        // Выберем из базы один курс
+        $em = static::getEntityManager();
+        $course = $em->getRepository(Course::class)->findByOneCourse();
+        // Выполним нажатие кнопки Сохранить
+        $crawler = $client->submitForm('AddCourse', [
+            'course[code]' => $course[0]->getCode(),
+            'course[name]' => 'Тест',
+            'course[description]' => 'Тест',
+        ]);
+        // считывание ошибки с формы
+        $error1 = $crawler->filter('li');
+
+        // Проверка поля поля  на количество description допустимых символов
+        $crawler = $client->submitForm('AddCourse', [
+            'course[code]' => '289289',
+            'course[name]' => 'Тест',
+            'course[description]' => $overCharacters,
+        ]);
+        $error2 = $crawler->filter('li');
+        // Вывод списка ошибок
+        self::assertSame(
+            [
+                'This value is too long. It should have 255 characters or less.',
+                'Поле должно быть уникальным',
+                'This value is too long. It should have 1000 characters or less.',
+            ],
+            [$error0->text(), $error1->text(), $error2->text()]);
+
+        // Выполним нажатие кнопки Сохранить
+        $client->submitForm('AddCourse',
+            [
+                'course[code]' => '0887005',
+                'course[name]' => 'Новый курс',
+                'course[description]' => 'Описание курса',
+            ]);
+        // Проверка перехода на главную страницу
+        self::assertTrue($client->getResponse()->isRedirect($this->pageCourse . '/'));
+        // Переход на галвную страницу
+        $crawler = $client->followRedirect();
         $this->assertResponseOk();
 
-        // Перейдем на страницу курса
-        $link = $crawler->filter('a.courseShow')->first()->link();
-        $crawler = $client->click($link);
+        // Сравнение количества курсов после добавления
+        // Получаем кол-во курсов на странице
+        //$coursesCount = $crawler->filter('div.card')->count();
+        // Получаем кол-во курсов из бд
+        $courses = self::getEntityManager()->getRepository(Course::class)->findAll();
+        self::assertEquals(count($courses), 5);
+    }
+
+    // Проверка оплаты курса
+    public function testCoursePay(): void
+    {
+        $auth = new SecurityControllerTest();
+        // Авторизация под ролью ROLE_SUPER_ADMIN
+        $data = [
+               'email' => 'artem@mail.ru',
+               'password' => 'Artem48',
+           ];
+
+        $requestData = $this->serializer->serialize($data, 'json');
+        $crawler = $auth->authorization($requestData);
+
+        $client = self::getClient();
+
+        $code = '1112';
+        $crawler = $client->request('GET', $this->pageCourse . '/' . $code . '/pay');
+        // Проверяем редирект
+        $this->assertResponseRedirect();
+        // Переходим на страницу редиректа
+        $crawler = $client->followRedirect();
         $this->assertResponseOk();
+        /*
 
-/*
-        $link = $crawler->filter('a.but')->first()->link();
-        $crawler = $client->click($link);
-        $this->assertResponseOk();
+                   $crawler = $client->request('GET', $this->pageCourse . '/');
+                   $this->assertResponseOk();
 
-        // Нажимаем на кнопку в модальном окне
-        $link = $crawler->filter('a.modalOk')->link();
-        $crawler = $client->click($link);
-        $this->assertResponseOk();
+                   // Перейдем на страницу курса
+                   $link = $crawler->filter('a.courseShow')->last()->link();
+                   $crawler = $client->click($link);
+                   $this->assertResponseOk();
+        //var_dump($client->getResponse());
+                           $link = $crawler->filter('a.but')->first()->link();
+                           $crawler = $client->click($link);
+                           $this->assertResponseOk();
 
-
-        // Проверка ответа запроса (редирект на страницу курса)
-        self::assertTrue($client->getResponse()->isRedirect('/courses/' . 1112 . '/pay'));*/
+                           // Нажимаем на кнопку в модальном окне
+                           $link = $crawler->filter('a.modalOk')->link();
+                           $crawler = $client->click($link);
+                           $this->assertResponseOk();
+                   // Проверка ответа запроса (редирект на страницу курса)
+                   self::assertTrue($client->getResponse()->isRedirect('/courses/' . 1114 . '/pay'));*/
     }
 }

@@ -2,7 +2,6 @@
 
 namespace App\Security;
 
-use App\Model\UserDto;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class User implements UserInterface
@@ -128,7 +127,7 @@ class User implements UserInterface
     public function setRefreshToken(string $refreshToken): self
     {
         $this->refreshToken = $refreshToken;
+
         return $this;
     }
-
 }

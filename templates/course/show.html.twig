@@ -13,7 +13,7 @@
         </div>
     {% endfor %}
     <!-- END Flash message -->
-    <h1>{{ course.name }}</h1>
+    <h1 id="title">{{ course.name }}</h1>
 
     {{ course.description }}
     {% if course.type == 'free' %}
@@ -88,7 +88,6 @@
             </div>
         </div>
         <!-- END Modal -->
-
 
 
     </div>

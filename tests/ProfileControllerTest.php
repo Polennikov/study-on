@@ -2,7 +2,6 @@
 
 namespace App\Tests;
 
-use PHPUnit\Framework\TestCase;
 use Symfony\Component\Serializer\SerializerInterface;
 
 class ProfileControllerTest extends AbstractTest
@@ -49,6 +48,7 @@ class ProfileControllerTest extends AbstractTest
         $username = $crawler->filter('#users');
         self::assertCount(1, $username);
     }
+
     public function testAccessTransactionHistory(): void
     {
         $auth = new SecurityControllerTest();

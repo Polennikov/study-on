@@ -2,15 +2,14 @@
 
 namespace App\Controller;
 
-use App\Exception\BillingUnavailableException;
-use App\Service\BillingClient;
 use App\Entity\Course;
+use App\Exception\BillingUnavailableException;
+use App\Repository\CourseRepository;
+use App\Service\BillingClient;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use App\Repository\CourseRepository;
-use DateInterval;
-use DateTime;
+
 class ProfileController extends AbstractController
 {
     /**
@@ -32,8 +31,8 @@ class ProfileController extends AbstractController
 
         return $this->render('profile/index.html.twig', [
             'controller_name' => 'ProfileController',
-            'name'            => $result['username'],
-            'balance'         => $result['balance'],
+            'name' => $result['username'],
+            'balance' => $result['balance'],
         ]);
     }
 
@@ -51,14 +50,13 @@ class ProfileController extends AbstractController
         // Получаем транзакции пользователя
         try {
             $transactions = $billingClient->getTransactionUserPayment($this->getUser(), 'null');
-        } catch ( BillingUnavailableException $e) {
+        } catch (BillingUnavailableException $e) {
             throw new \Exception($e->getMessage());
         }
-        $coursesData=[];
+        $coursesData = [];
         foreach ($transactions as $transaction) {
-
             if (isset($transaction['course_code'])) {
-                $course        = $courseRepository->findOneBy(['code' => $transaction['course_code']]);
+                $course = $courseRepository->findOneBy(['code' => $transaction['course_code']]);
                 $coursesData[] = $this->courseFilter(
                     $course->getCode(),
                     $course->getName(),
@@ -77,10 +75,9 @@ class ProfileController extends AbstractController
                     null
                 );
             }
-
         }
-        return $this->render('profile/Transactions.html.twig', [
 
+        return $this->render('profile/Transactions.html.twig', [
             'transactions' => $coursesData,
         ]);
     }
@@ -94,13 +91,12 @@ class ProfileController extends AbstractController
         ?Course $course
     ): array {
         return [
-            'code'        => $code,
-            'name'        => $name,
-            'type'        => $type,
-            'cost'        => $cost,
-            'created_at'  => $created_at,
-            'course'      => $course,
+            'code' => $code,
+            'name' => $name,
+            'type' => $type,
+            'cost' => $cost,
+            'created_at' => $created_at,
+            'course' => $course,
         ];
     }
-
 }

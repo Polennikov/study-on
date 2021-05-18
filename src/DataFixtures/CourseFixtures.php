@@ -17,7 +17,7 @@ class CourseFixtures extends Fixture
             'Администрирование вмногопользовательских системах',
             'Защита информации',
         ];
-        $code=1111;
+        $code = 1111;
         foreach ($courses as $name) {
             $course = new Course();
             $course->setName($name);

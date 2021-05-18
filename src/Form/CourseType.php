@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Course;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -34,6 +35,19 @@ class CourseType extends AbstractType
                     new Length([
                         'max' => 255,
                     ]),
+                ],
+            ])
+            ->add('cost', TextType::class, [
+                'mapped' => false,
+                'label' => 'Стоимость курса',
+            ])
+            ->add('type', ChoiceType::class, [
+                'mapped' => false,
+                'label' => 'Тип курса',
+                'choices' => [
+                    'Бесплатно' => 'free',
+                    'Аренда' => 'rent',
+                    'Покупка' => 'buy',
                 ],
             ]);
     }
