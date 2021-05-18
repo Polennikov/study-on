@@ -26,6 +26,10 @@ class CourseControllerTest extends AbstractTest
     // Проверка на корректный http-статус без авторизации и с авторизацией под ROLE_USER одинакова
     public function testCoursePageOkUser(): void
     {
+        // Подмена сервисов
+        $mock = new SecurityControllerTest();
+        $mock->getBillingClient();
+
         $em = static::getEntityManager();
         $courses = $em->getRepository(Course::class)->findByOneCourse();
         self::assertNotEmpty($courses);
@@ -134,6 +138,10 @@ class CourseControllerTest extends AbstractTest
     // Проверка отдельной страницы каждого курса
     public function testCourseShow(): void
     {
+        // Подмена сервисов
+        $mock = new SecurityControllerTest();
+        $mock->getBillingClient();
+
         $client = self::getClient();
         //  Получаем кол-во курсов из бд
         $courses = self::getEntityManager()->getRepository(Course::class)->findAll();
